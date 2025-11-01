@@ -60,6 +60,20 @@ react-vite/
 └── README.md           # Ce fichier
 ```
 
+## Alias d'import
+
+Un alias `@components` est disponible pour importer rapidement les composants depuis le dossier racine `components/`.
+
+Exemple :
+
+```ts
+import Button from '@components/Button'
+// ou
+import Button from '@components/Button/Button'
+```
+
+TypeScript et Vite sont configurés pour résoudre cet alias via `tsconfig.json` et `vite.config.ts`.
+
 ## Fonctionnalités
 
 - ⚡️ Rechargement rapide avec Vite HMR
