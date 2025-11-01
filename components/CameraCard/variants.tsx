@@ -1,5 +1,5 @@
+import { Variants } from '@components/Button/styles'
 import { Theme } from '@components/theme'
-import { Variants } from './styles'
 
 export const buttonLightVariant = (theme: Theme): Variants => ({
   backgroundColor: theme.colors.light,

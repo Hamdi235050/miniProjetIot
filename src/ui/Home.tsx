@@ -45,8 +45,6 @@ export const Home = () => {
       })
       streamRef.current = stream
       setIsCameraOpen(true)
-
-      // Wait for next tick to ensure video element is rendered
       setTimeout(() => {
         if (videoRef.current && streamRef.current) {
           videoRef.current.srcObject = streamRef.current
@@ -84,11 +82,8 @@ export const Home = () => {
     if (videoRef.current) {
       try {
         videoRef.current.pause()
-        // @ts-ignore
         videoRef.current.srcObject = null
-      } catch (e) {
-        // ignore
-      }
+      } catch (e) {}
     }
     setIsCameraOpen(false)
   }
@@ -135,7 +130,7 @@ export const Home = () => {
                 autoPlay
                 playsInline
                 muted
-                style={classes.video}
+                className={classes.video}
               />
             ) : (
               <>
