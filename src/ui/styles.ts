@@ -8,7 +8,7 @@ export const useStyles = createUseStyles((theme: Theme) => ({
     display: 'flex',
     flexDirection: 'column',
     boxSizing: 'border-box',
-    height: '90vh',
+    height: '100vh',
     justifyContent: 'center',
   },
   noImage: {
@@ -25,6 +25,28 @@ export const useStyles = createUseStyles((theme: Theme) => ({
     display: 'flex',
     justifyContent: 'center',
     gap: 16,
+  },
+  detectionsContainer: {
+    padding: '8px',
+    backgroundColor: '#fff',
+    borderRadius: '4px',
+    display: 'flex',
+    justifyContent: 'space-between',
+  },
+  imageIsProcessing: {
+    marginTop: '10px',
+    textAlign: 'center',
+    color: theme.colors.bright_purple,
+  },
+  modeEnTempsReelContainer: {
+    marginTop: '10px',
+    textAlign: 'center',
+    color: theme.colors.flame,
+    fontWeight: 'bold',
+  },
+  detectionResult: {
+    backgroundColor: theme.colors.light,
+    borderRadius: '8px',
   },
   camera: {
     display: 'flex',
