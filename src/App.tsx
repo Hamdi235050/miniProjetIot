@@ -5,7 +5,9 @@ import { Home } from './ui/Home'
 function App() {
   return (
     <ThemeProvider>
-      <Home />
+      <div className="main">
+        <Home />
+      </div>
     </ThemeProvider>
   )
 }

@@ -8,4 +8,5 @@ export const buttonLightVariant = (theme: Theme): Variants => ({
 export const button_purpleVariant = (theme: Theme): Variants => ({
   backgroundColor: theme.colors.bright_purple,
   color: theme.colors.white,
+  iconColor: theme.colors.white,
 })

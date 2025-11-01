@@ -3,6 +3,7 @@ import { createUseStyles } from 'react-jss'
 export type Variants = {
   color: string
   backgroundColor: string
+  iconColor?: string
 }
 export const useStyles = createUseStyles(
   (theme: Theme & { variants: Variants }) => ({
@@ -13,8 +14,12 @@ export const useStyles = createUseStyles(
       borderRadius: '8px',
       display: 'flex',
       width: 'fit-content',
+      gap: '8px',
       border: '0.8px solid rgba(0, 0, 0, 0.10)',
       cursor: 'pointer',
+      '&:nth-child(2)': {
+        color: theme.variants.color,
+      },
     },
   })
 )

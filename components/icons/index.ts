@@ -1,2 +1,4 @@
 export { Export } from './Export'
 export { Camera } from './Camera'
+export { Close } from './Close'
+export { Send } from './Send'

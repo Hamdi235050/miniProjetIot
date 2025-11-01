@@ -23,11 +23,9 @@ export const Button = ({
   }
   const classes = useStyles({ theme: extendedTheme })
   return (
-    <div>
-      <button className={classes.button} onClick={onClick}>
-        {children}
-        <span> {label}</span>
-      </button>
-    </div>
+    <button className={classes.button} onClick={onClick}>
+      {children}
+      <span> {label}</span>
+    </button>
   )
 }

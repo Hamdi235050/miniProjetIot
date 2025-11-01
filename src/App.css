@@ -1,0 +1,10 @@
+/* Global App Styles */
+
+.main {
+  background-color: #F3F4F6; /* theme.colors.light */
+  display: flex;
+  justify-content: center;
+  height: 100vh;
+ }
+
+/* Additional global styles can be added here */
