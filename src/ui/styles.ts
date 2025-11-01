@@ -44,7 +44,7 @@ export const useStyles = createUseStyles((theme: Theme) => ({
     right: 12,
     width: 32,
     height: 32,
-    borderRadius: 16,
+    borderRadius: 10,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
