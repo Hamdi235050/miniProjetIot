@@ -15,15 +15,33 @@ export function saveImage(base64Image: string): string | null {
     const filename = `detection_${Date.now()}.jpg`
     const imagePath = path.join(IMAGES_DIR, filename)
 
-    // Extraire les données base64 et sauvegarder
     const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '')
     fs.writeFileSync(imagePath, base64Data, 'base64')
     console.log(`   ✅ Image sauvegardée: ${filename}`)
 
-    return imagePath
+    return filename
   } catch (err) {
     console.error('   ❌ Erreur sauvegarde image:', (err as Error).message)
     return null
+  }
+}
+
+export function getImagePath(filename: string): string {
+  return path.join(IMAGES_DIR, filename)
+}
+
+export function deleteImage(filename: string): boolean {
+  try {
+    const imagePath = path.join(IMAGES_DIR, filename)
+    if (fs.existsSync(imagePath)) {
+      fs.unlinkSync(imagePath)
+      console.log(`   🗑️  Image supprimée: ${filename}`)
+      return true
+    }
+    return false
+  } catch (err) {
+    console.error('   ❌ Erreur suppression image:', (err as Error).message)
+    return false
   }
 }
 

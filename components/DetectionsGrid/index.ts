@@ -1,0 +1,1 @@
+export { DetectionsGrid } from './DetectionsGrid'

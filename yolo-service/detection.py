@@ -9,7 +9,7 @@ import base64
 from datetime import datetime
 import ssl
 
- load_dotenv()
+load_dotenv()
 
 MQTT_BROKER = os.getenv("MQTT_BROKER")
 MQTT_PORT = int(os.getenv("MQTT_PORT"))
@@ -28,7 +28,7 @@ def process_image(image_base64):
     Retourne les détections et l'image annotée
     """
     try:
-         if ',' in image_base64:
+        if ',' in image_base64:
             image_base64 = image_base64.split(',')[1]
         
         img_data = base64.b64decode(image_base64)
@@ -39,9 +39,9 @@ def process_image(image_base64):
             print("[ERROR] Impossible de décoder l'image")
             return None
         
-         results = model(image, conf=0.25)
+        results = model(image, conf=0.25)
         
-         detections = []
+        detections = []
         for result in results:
             boxes = result.boxes
             for box in boxes:
@@ -75,7 +75,7 @@ def process_image(image_base64):
         print(f"[ERROR] Erreur lors du traitement: {e}")
         return None
 
- def on_message(client, userdata, msg):
+def on_message(client, userdata, msg):
     """
     Callback appelé quand un message arrive sur le topic iot/images
     """
@@ -94,7 +94,7 @@ def process_image(image_base64):
             for det in result['detections']:
                 print(f"  - {det['label']} (conf: {det['confidence']:.2f})")
             
-             client.publish(
+            client.publish(
                 TOPIC_DETECTIONS,
                 json.dumps(result),
                 qos=1
@@ -117,13 +117,13 @@ def on_disconnect(client, userdata, rc):
     if rc != 0:
         print(f"[MQTT] Déconnexion inattendue, code: {rc}")
 
- mqtt_client = mqtt.Client()
+mqtt_client = mqtt.Client()
 mqtt_client.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
 mqtt_client.on_connect = on_connect
 mqtt_client.on_message = on_message
 mqtt_client.on_disconnect = on_disconnect
 
- mqtt_client.tls_set(cert_reqs=ssl.CERT_REQUIRED, tls_version=ssl.PROTOCOL_TLS)
+mqtt_client.tls_set(cert_reqs=ssl.CERT_REQUIRED, tls_version=ssl.PROTOCOL_TLS)
 
 mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
 

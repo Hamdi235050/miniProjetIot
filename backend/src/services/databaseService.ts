@@ -1,10 +1,7 @@
-import path from 'path'
-import { Detection } from '../types'
 import { getPool } from '../config/database'
+import { Detection } from '../types'
 
 export async function saveDetection(data: Detection): Promise<void> {
-  console.log('💾 Sauvegarde de la détection...')
-
   const ts = data.timestamp || new Date().toISOString()
   const count = data.count || 0
   const detectionsJson = JSON.stringify(data.detections || [])
@@ -16,12 +13,7 @@ export async function saveDetection(data: Detection): Promise<void> {
       INSERT INTO detections (timestamp, count, detections, image_path)
       VALUES (?, ?, ?, ?)
     `
-    const result: any = await pool.query(insertSQL, [
-      ts,
-      count,
-      detectionsJson,
-      imagePath,
-    ])
+    await pool.query(insertSQL, [ts, count, detectionsJson, imagePath])
   } catch (err) {
     console.error(
       '   ❌ Erreur sauvegarde en base de données:',
@@ -36,7 +28,7 @@ export async function getLatestDetections(
 ): Promise<Detection[]> {
   const pool = getPool()
   const rows = await pool.query(
-    `SELECT id, timestamp, count, detections, created_at FROM detections ORDER BY created_at DESC LIMIT ?`,
+    `SELECT id, timestamp, count, detections, image_path, created_at FROM detections ORDER BY created_at DESC LIMIT ?`,
     [limit]
   )
 

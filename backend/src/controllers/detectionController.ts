@@ -34,7 +34,15 @@ export function getLatest(req: Request, res: Response): void {
   const detection = getLatestDetection()
 
   if (detection) {
-    res.json(detection)
+    // Ajouter l'URL complète de l'image
+    const baseUrl = `${req.protocol}://${req.get('host')}`
+    const detectionWithImageUrl = {
+      ...detection,
+      image_url: detection.image_path
+        ? `${baseUrl}/images/${detection.image_path}`
+        : null,
+    }
+    res.json(detectionWithImageUrl)
   } else {
     res.json({
       message: 'En attente de détection...',
@@ -52,7 +60,15 @@ export async function getAllDetections(
   try {
     const limit = parseInt(req.query.limit as string) || 50
     const rows = await getLatestDetections(limit)
-    res.json(rows)
+
+    // Ajouter l'URL complète de l'image à chaque détection
+    const baseUrl = `${req.protocol}://${req.get('host')}`
+    const rowsWithImageUrl = rows.map((row) => ({
+      ...row,
+      image_url: row.image_path ? `${baseUrl}/images/${row.image_path}` : null,
+    }))
+
+    res.json(rowsWithImageUrl)
   } catch (err) {
     console.error('Erreur DB:', err)
     res.status(500).json({ error: (err as Error).message })
@@ -72,14 +88,21 @@ export async function getDetectionByIdController(
       return
     }
 
-    res.json(row)
+    // Ajouter l'URL complète de l'image
+    const baseUrl = `${req.protocol}://${req.get('host')}`
+    const rowWithImageUrl = {
+      ...row,
+      image_url: row.image_path ? `${baseUrl}/images/${row.image_path}` : null,
+    }
+
+    res.json(rowWithImageUrl)
   } catch (err) {
     res.status(500).json({ error: (err as Error).message })
   }
 }
 
 export async function getStatsController(
-  req: Request,
+  _req: Request,
   res: Response
 ): Promise<void> {
   try {

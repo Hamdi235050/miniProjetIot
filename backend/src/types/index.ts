@@ -4,6 +4,7 @@ export interface Detection {
   count: number
   detections: DetectionItem[]
   image_path?: string | null
+  image_url?: string | null
   created_at?: string
   annotated_image?: string
   status?: string

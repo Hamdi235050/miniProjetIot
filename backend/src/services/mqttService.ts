@@ -15,14 +15,19 @@ export function initMqttClient(): void {
       password: config.mqtt.password,
       protocol: 'mqtts',
       rejectUnauthorized: true,
+      reconnectPeriod: 5000,
+      connectTimeout: 30000,
+      clean: true,
     }
   )
 
   mqttClient.on('connect', () => {
     console.log('✅ Connecté au broker MQTT')
-    mqttClient.subscribe(config.mqtt.topicDetections, (err) => {
+    mqttClient.subscribe(config.mqtt.topicDetections, { qos: 1 }, (err) => {
       if (!err) {
         console.log(`📡 Abonné au topic: ${config.mqtt.topicDetections}`)
+      } else {
+        console.error(`❌ Erreur d'abonnement au topic:`, err)
       }
     })
   })
@@ -56,6 +61,11 @@ export function initMqttClient(): void {
 
 export function publishImage(image: string, timestamp: string): Promise<void> {
   return new Promise((resolve, reject) => {
+    if (!mqttClient || !mqttClient.connected) {
+      reject(new Error('MQTT client not connected'))
+      return
+    }
+
     const payload = {
       image,
       timestamp,
@@ -64,12 +74,14 @@ export function publishImage(image: string, timestamp: string): Promise<void> {
     mqttClient.publish(
       config.mqtt.topicImages,
       JSON.stringify(payload),
+      { qos: 1, retain: false },
       (err) => {
         if (err) {
-          console.error('Erreur publication MQTT:', err)
+          console.error('❌ Erreur publication MQTT:', err)
           reject(err)
         } else {
           console.log('📤 Image envoyée au service YOLO')
+          console.log(`   Topic: ${config.mqtt.topicImages}`)
           resolve()
         }
       }

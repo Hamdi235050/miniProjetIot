@@ -2,12 +2,14 @@ import React, { useState, useRef, useEffect } from 'react'
 import { Button, button_purpleVariant } from '@components/Button'
 import { buttonLightVariant } from '@components/Button'
 import { useTheme } from '@components/theme'
-import { Export, Camera, Close } from '@components/icons'
+import { Export, Camera } from '@components/icons'
 import { useStyles } from './styles'
 import { CameraCard } from '@components/CameraCard'
-import { DetectionResult } from './types'
+import { DetectionResult, DetectionFromDB } from './types'
 import { Scrolled } from '@components/Scrolled'
-import { uploadImageForDetection } from './utils/backend'
+import { CameraView } from '@components/CameraView'
+import { DetectionsGrid } from '@components/DetectionsGrid'
+import { uploadImageForDetection, getDetections } from './utils/backend'
 
 export const Home = () => {
   const theme = useTheme()
@@ -18,10 +20,13 @@ export const Home = () => {
   const [detectionResult, setDetectionResult] =
     useState<DetectionResult | null>(null)
   const [isStreamingMode, setIsStreamingMode] = useState(false)
+  const [detections, setDetections] = useState<DetectionFromDB[]>([])
+  const [isLoadingDetections, setIsLoadingDetections] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const streamIntervalRef = useRef<number | null>(null)
+  const pollIntervalRef = useRef<number | null>(null)
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -38,12 +43,29 @@ export const Home = () => {
     fileInputRef.current?.click()
   }
 
+  const fetchDetections = async () => {
+    try {
+      setIsLoadingDetections(true)
+      const data = await getDetections(20)
+      setDetections(data)
+    } catch (error) {
+      console.error('Erreur lors de la récupération des détections:', error)
+    } finally {
+      setIsLoadingDetections(false)
+    }
+  }
+
   const sendImageToBackend = async (imageData: string) => {
     try {
       setIsProcessing(true)
 
       const result = await uploadImageForDetection(imageData)
       console.log('Image envoyée avec succès:', result)
+
+      // Attendre 2 secondes puis rafraîchir les détections
+      setTimeout(() => {
+        fetchDetections()
+      }, 2000)
     } catch (error) {
       console.error("Erreur lors de l'envoi:", error)
       alert("Erreur lors de l'envoi de l'image au backend")
@@ -126,10 +148,21 @@ export const Home = () => {
   }
 
   useEffect(() => {
+    // Charger les détections au montage du composant
+    fetchDetections()
+
+    // Polling toutes les 5 secondes pour rafraîchir les détections
+    pollIntervalRef.current = setInterval(() => {
+      fetchDetections()
+    }, 5000)
+
     return () => {
       stopStreaming()
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((t) => t.stop())
+      }
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current)
       }
     }
   }, [])
@@ -142,43 +175,13 @@ export const Home = () => {
             <p className={classes.text}>Capture Photo</p>
             <p>Prenez une photo ou importez une image existante</p>
           </div>
-          <div
-            className={classes.camera}
-            style={selectedImage || isCameraOpen ? { padding: 0 } : undefined}
-          >
-            {selectedImage ? (
-              <>
-                <div
-                  className={classes.closeButton}
-                  onClick={() => setSelectedImage(null)}
-                  role="button"
-                  aria-label="Annuler l'upload"
-                >
-                  <Close width={12} height={12} color="#fff" />
-                </div>
-                <img
-                  src={selectedImage}
-                  alt="Selected"
-                  className={classes.image}
-                />
-              </>
-            ) : isCameraOpen ? (
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                className={classes.video}
-              />
-            ) : (
-              <>
-                <div style={{ color: theme.colors.slate_gray }}>
-                  <Camera width={40} height={40} />
-                </div>
-                <p className={classes.noImage}>Aucune image sélectionnée</p>
-              </>
-            )}
-          </div>
+          <CameraView
+            selectedImage={selectedImage}
+            isCameraOpen={isCameraOpen}
+            videoRef={videoRef}
+            theme={theme}
+            onClose={() => setSelectedImage(null)}
+          />
           <div className={classes.buttons}>
             {selectedImage ? (
               <>
@@ -282,6 +285,21 @@ export const Home = () => {
           </div>
         )}
       </div>
+
+      <CameraCard ctx={{ theme }}>
+        <div className={classes.containerCamera}>
+          <div>
+            <p className={classes.text}>Détections Récentes</p>
+            <p>Historique des détections d'objets</p>
+          </div>
+
+          <DetectionsGrid
+            detections={detections}
+            theme={theme}
+            isLoading={isLoadingDetections}
+          />
+        </div>
+      </CameraCard>
     </Scrolled>
   )
 }

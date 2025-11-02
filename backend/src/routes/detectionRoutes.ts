@@ -10,7 +10,7 @@ import {
 const router = Router()
 
 // Endpoint de test
-router.get('/hello', (req, res) => {
+router.get('/hello', (_req, res) => {
   res.json({ message: 'Hello from IoT Backend with YOLO!' })
 })
 
