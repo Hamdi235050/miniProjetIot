@@ -9,7 +9,9 @@ import { DetectionResult, DetectionFromDB } from './types'
 import { Scrolled } from '@components/Scrolled'
 import { CameraView } from '@components/CameraView'
 import { DetectionsGrid } from '@components/DetectionsGrid'
+import { MQTTStatusIndicator } from '@components/MQTTStatusIndicator'
 import { uploadImageForDetection, getDetections } from './utils/backend'
+import { mqttObservable } from './utils/mqttObservable'
 
 export const Home = () => {
   const theme = useTheme()
@@ -25,8 +27,8 @@ export const Home = () => {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
-  const streamIntervalRef = useRef<number | null>(null)
-  const pollIntervalRef = useRef<number | null>(null)
+  const streamIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const [isMqttConnected, setIsMqttConnected] = useState(false)
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -151,19 +153,23 @@ export const Home = () => {
     // Charger les détections au montage du composant
     fetchDetections()
 
-    // Polling toutes les 5 secondes pour rafraîchir les détections
-    pollIntervalRef.current = setInterval(() => {
+    // Subscribe to MQTT observable for real-time updates
+    const unsubscribe = mqttObservable.subscribe((detection) => {
+      console.log('🔔 New detection received via MQTT:', detection)
+      // Refresh detections when new detection arrives
       fetchDetections()
-    }, 5000)
+    })
+
+    // Check MQTT connection status
+    setIsMqttConnected(mqttObservable.getConnectionStatus())
 
     return () => {
       stopStreaming()
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((t) => t.stop())
       }
-      if (pollIntervalRef.current) {
-        clearInterval(pollIntervalRef.current)
-      }
+      // Unsubscribe from MQTT
+      unsubscribe()
     }
   }, [])
 
@@ -284,6 +290,10 @@ export const Home = () => {
             🔴 MODE TEMPS RÉEL ACTIF
           </div>
         )}
+
+        <div style={{ textAlign: 'center' }}>
+          <MQTTStatusIndicator isConnected={isMqttConnected} theme={theme} />
+        </div>
       </div>
 
       <CameraCard ctx={{ theme }}>

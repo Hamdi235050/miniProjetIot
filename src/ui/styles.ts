@@ -46,6 +46,20 @@ export const useStyles = createUseStyles((theme: Theme) => ({
     color: theme.colors.flame,
     fontWeight: 'bold',
   },
+  mqttStatusConnected: {
+    marginTop: '10px',
+    textAlign: 'center',
+    color: '#10b981',
+    fontWeight: 'bold',
+    fontSize: '14px',
+  },
+  mqttStatusDisconnected: {
+    marginTop: '10px',
+    textAlign: 'center',
+    color: theme.colors.flame,
+    fontWeight: 'bold',
+    fontSize: '14px',
+  },
   detectionResult: {
     backgroundColor: theme.colors.light,
     borderRadius: '8px',
