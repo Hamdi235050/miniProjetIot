@@ -2,7 +2,6 @@ import mqtt, { MqttClient } from 'mqtt'
 import { config } from '../config/env'
 import { Detection } from '../types'
 import { saveDetection } from './databaseService'
-import { saveImage } from './imageService'
 
 let mqttClient: MqttClient
 let latestDetection: Detection | null = null
@@ -39,11 +38,9 @@ export function initMqttClient(): void {
         latestDetection = data
         console.log(`🔍 Détection reçue: ${data.count} objet(s)`)
 
-        // Sauvegarder l'image si présente
-        if (data.annotated_image) {
-          const imagePath = saveImage(data.annotated_image)
-          data.image_path = imagePath
-        }
+        // L'image est déjà sauvegardée dans le dossier images lors de l'upload initial
+        // On utilise le chemin existant qui devrait être dans data.image_path
+        // Pas besoin de re-sauvegarder l'image depuis annotated_image
 
         await saveDetection(data).catch((err) =>
           console.error('Erreur saveDetection:', err)
@@ -59,7 +56,11 @@ export function initMqttClient(): void {
   })
 }
 
-export function publishImage(image: string, timestamp: string): Promise<void> {
+export function publishImage(
+  image: string,
+  timestamp: string,
+  imagePath: string
+): Promise<void> {
   return new Promise((resolve, reject) => {
     if (!mqttClient || !mqttClient.connected) {
       reject(new Error('MQTT client not connected'))
@@ -69,6 +70,7 @@ export function publishImage(image: string, timestamp: string): Promise<void> {
     const payload = {
       image,
       timestamp,
+      image_path: imagePath, // Inclure le chemin de l'image sauvegardée
     }
 
     mqttClient.publish(
@@ -82,6 +84,7 @@ export function publishImage(image: string, timestamp: string): Promise<void> {
         } else {
           console.log('📤 Image envoyée au service YOLO')
           console.log(`   Topic: ${config.mqtt.topicImages}`)
+          console.log(`   Chemin image: ${imagePath}`)
           resolve()
         }
       }

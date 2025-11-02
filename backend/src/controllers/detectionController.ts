@@ -5,6 +5,7 @@ import {
   getDetectionById,
   getStats,
 } from '../services/databaseService'
+import { saveImage } from '../services/imageService'
 
 export async function detectImage(req: Request, res: Response): Promise<void> {
   try {
@@ -15,14 +16,23 @@ export async function detectImage(req: Request, res: Response): Promise<void> {
       return
     }
 
+    // Sauvegarder l'image dans le dossier images AVANT de la publier
+    const imagePath = saveImage(image)
+    if (!imagePath) {
+      res.status(500).json({ error: "Erreur lors de la sauvegarde de l'image" })
+      return
+    }
+
     const timestamp = new Date().toISOString()
 
-    await publishImage(image, timestamp)
+    // Publier l'image avec son chemin pour que YOLO puisse l'utiliser
+    await publishImage(image, timestamp, imagePath)
 
     res.json({
       success: true,
       message: 'Image envoyée pour détection',
       timestamp,
+      image_path: imagePath,
     })
   } catch (error) {
     console.error('Erreur /api/detect:', error)
