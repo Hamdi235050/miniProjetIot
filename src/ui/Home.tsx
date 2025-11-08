@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { Button, button_purpleVariant } from '@components/Button'
 import { buttonLightVariant, buttonDangerVariant } from '@components/Button'
 import { useTheme } from '@components/theme'
-import { Export, Camera } from '@components/icons'
+import { Export, Camera, Trash } from '@components/icons'
 import { useStyles } from './styles'
 import { CameraCard } from '@components/CameraCard'
 import { Scrolled } from '@components/Scrolled'
@@ -69,7 +69,6 @@ export const Home = () => {
       const result = await uploadImageForDetection(imageData)
       console.log('Image envoyée avec succès:', result)
 
-      // Attendre 2 secondes puis rafraîchir les détections
       setTimeout(() => {
         fetchDetections()
       }, 2000)
@@ -181,17 +180,13 @@ export const Home = () => {
   }
 
   useEffect(() => {
-    // Charger les détections au montage du composant
     fetchDetections()
 
-    // Subscribe to MQTT observable for real-time updates
     const unsubscribe = mqttObservable.subscribe((detection) => {
       console.log('🔔 New detection received via MQTT:', detection)
-      // Refresh detections when new detection arrives
       fetchDetections()
     })
 
-    // Subscribe to MQTT connection status changes
     const unsubscribeStatus = mqttObservable.subscribeToStatus(
       (isConnected) => {
         console.log('🔌 MQTT connection status changed:', isConnected)
@@ -204,7 +199,6 @@ export const Home = () => {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((t) => t.stop())
       }
-      // Unsubscribe from MQTT
       unsubscribe()
       unsubscribeStatus()
     }
@@ -311,7 +305,7 @@ export const Home = () => {
           <div
             style={{
               display: 'flex',
-              justifyContent: 'space-between',
+              justifyContent: 'center',
               alignItems: 'center',
             }}
           >
@@ -326,7 +320,9 @@ export const Home = () => {
                 label="Tout Supprimer"
                 variants={buttonDangerVariant}
               >
-                <span style={{ fontSize: '18px' }}>🗑️</span>
+                <span style={{ fontSize: '18px' }}>
+                  <Trash height={24} width={24} />
+                </span>
               </Button>
             )}
           </div>

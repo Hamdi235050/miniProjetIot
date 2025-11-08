@@ -19,6 +19,7 @@ export const useStyles = createUseStyles(
       cursor: 'pointer',
       '&:nth-child(2)': {
         color: theme.variants.color,
+        alignItems: 'center',
       },
     },
   })
