@@ -1,10 +1,12 @@
 import mqtt, { MqttClient, IClientSubscribeOptions } from 'mqtt'
 
 type DetectionCallback = (detection: any) => void
+type ConnectionStatusCallback = (isConnected: boolean) => void
 
 class MQTTObservable {
   private client: MqttClient | null = null
   private callbacks: Set<DetectionCallback> = new Set()
+  private statusCallbacks: Set<ConnectionStatusCallback> = new Set()
   private isConnected = false
 
   constructor() {
@@ -12,13 +14,10 @@ class MQTTObservable {
   }
 
   private connect() {
-    const brokerUrl =
-      import.meta.env.VITE_MQTT_BROKER_WS ||
-      'wss://055475704346454fa08a98c6ef6effad.s1.eu.hivemq.cloud:8884/mqtt'
-    const username = import.meta.env.VITE_MQTT_USERNAME || 'hamdi'
-    const password = import.meta.env.VITE_MQTT_PASSWORD || 'Hamdi123'
-    const topic =
-      import.meta.env.VITE_MQTT_TOPIC_DETECTIONS || 'iot/yolo/detections'
+    const brokerUrl = import.meta.env.VITE_MQTT_BROKER_WS
+    const username = import.meta.env.VITE_MQTT_USERNAME
+    const password = import.meta.env.VITE_MQTT_PASSWORD
+    const topic = import.meta.env.VITE_MQTT_TOPIC_DETECTIONS
 
     try {
       this.client = mqtt.connect(brokerUrl, {
@@ -31,6 +30,7 @@ class MQTTObservable {
       this.client.on('connect', () => {
         console.log('✅ Connected to MQTT broker')
         this.isConnected = true
+        this.notifyStatusChange(true)
 
         this.client?.subscribe(
           topic,
@@ -60,11 +60,13 @@ class MQTTObservable {
       this.client.on('error', (error: Error) => {
         console.error('❌ MQTT connection error:', error)
         this.isConnected = false
+        this.notifyStatusChange(false)
       })
 
       this.client.on('close', () => {
         console.log('🔌 MQTT connection closed')
         this.isConnected = false
+        this.notifyStatusChange(false)
       })
 
       this.client.on('reconnect', () => {
@@ -75,6 +77,10 @@ class MQTTObservable {
     }
   }
 
+  private notifyStatusChange(isConnected: boolean) {
+    this.statusCallbacks.forEach((callback) => callback(isConnected))
+  }
+
   subscribe(callback: DetectionCallback) {
     this.callbacks.add(callback)
 
@@ -83,11 +89,22 @@ class MQTTObservable {
     }
   }
 
+  subscribeToStatus(callback: ConnectionStatusCallback) {
+    this.statusCallbacks.add(callback)
+    // Notify immediately with current status
+    callback(this.isConnected)
+
+    return () => {
+      this.statusCallbacks.delete(callback)
+    }
+  }
+
   disconnect() {
     if (this.client) {
       this.client.end()
       this.client = null
       this.isConnected = false
+      this.notifyStatusChange(false)
     }
   }
 

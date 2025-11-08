@@ -69,3 +69,18 @@ export async function getStats(): Promise<any> {
 
   return rows[0]
 }
+
+export async function getAllImagePaths(): Promise<string[]> {
+  const pool = getPool()
+  const rows = await pool.query(
+    `SELECT image_path FROM detections WHERE image_path IS NOT NULL`
+  )
+
+  return rows.map((row: any) => row.image_path).filter(Boolean)
+}
+
+export async function deleteAllDetections(): Promise<void> {
+  const pool = getPool()
+  await pool.query(`DELETE FROM detections`)
+  console.log('   🗑️  Toutes les détections ont été supprimées de la base')
+}

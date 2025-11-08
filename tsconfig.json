@@ -8,7 +8,8 @@
     "baseUrl": ".",
     "paths": {
       "@components/*": ["components/*"],
-      "@components": ["components"]
+      "@components": ["components"],
+      "@/types": ["src/types"]
     },
     "moduleResolution": "Node",
     "strict": true,

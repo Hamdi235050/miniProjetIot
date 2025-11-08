@@ -10,5 +10,8 @@ export const useStyles = createUseStyles((theme: Theme) => ({
     borderRadius: 14,
     background: 'rgba(255, 255, 255, 0.9)',
     boxShadow: theme.boxShadow.boxShadowLarge,
+    flex: '1 1 400px',
+    minWidth: '350px',
+    maxWidth: '600px',
   },
 }))

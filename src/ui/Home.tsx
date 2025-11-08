@@ -1,16 +1,21 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Button, button_purpleVariant } from '@components/Button'
-import { buttonLightVariant } from '@components/Button'
+import { buttonLightVariant, buttonDangerVariant } from '@components/Button'
 import { useTheme } from '@components/theme'
 import { Export, Camera } from '@components/icons'
 import { useStyles } from './styles'
 import { CameraCard } from '@components/CameraCard'
-import { DetectionResult, DetectionFromDB } from './types'
 import { Scrolled } from '@components/Scrolled'
 import { CameraView } from '@components/CameraView'
 import { DetectionsGrid } from '@components/DetectionsGrid'
 import { MQTTStatusIndicator } from '@components/MQTTStatusIndicator'
-import { uploadImageForDetection, getDetections } from './utils/backend'
+import { DetectionResult } from '@components/DetectionResult'
+import { DetectionFromDB, DetectionResultData } from '@/types'
+import {
+  uploadImageForDetection,
+  getDetections,
+  deleteAllDetections,
+} from './utils/backend'
 import { mqttObservable } from './utils/mqttObservable'
 
 export const Home = () => {
@@ -20,7 +25,7 @@ export const Home = () => {
   const [isCameraOpen, setIsCameraOpen] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [detectionResult, setDetectionResult] =
-    useState<DetectionResult | null>(null)
+    useState<DetectionResultData | null>(null)
   const [isStreamingMode, setIsStreamingMode] = useState(false)
   const [detections, setDetections] = useState<DetectionFromDB[]>([])
   const [isLoadingDetections, setIsLoadingDetections] = useState(false)
@@ -149,6 +154,32 @@ export const Home = () => {
     console.log('Mode streaming désactivé')
   }
 
+  const handleDeleteAll = async () => {
+    if (
+      !window.confirm(
+        'Êtes-vous sûr de vouloir supprimer toutes les détections et leurs images ? Cette action est irréversible.'
+      )
+    ) {
+      return
+    }
+
+    try {
+      setIsLoadingDetections(true)
+      const result = await deleteAllDetections()
+      console.log('✅ Suppression réussie:', result)
+      alert(
+        `Toutes les détections ont été supprimées (${result.deleted_images} images)`
+      )
+      // Rafraîchir la liste
+      setDetections([])
+    } catch (error) {
+      console.error('❌ Erreur lors de la suppression:', error)
+      alert('Erreur lors de la suppression des détections')
+    } finally {
+      setIsLoadingDetections(false)
+    }
+  }
+
   useEffect(() => {
     // Charger les détections au montage du composant
     fetchDetections()
@@ -160,8 +191,13 @@ export const Home = () => {
       fetchDetections()
     })
 
-    // Check MQTT connection status
-    setIsMqttConnected(mqttObservable.getConnectionStatus())
+    // Subscribe to MQTT connection status changes
+    const unsubscribeStatus = mqttObservable.subscribeToStatus(
+      (isConnected) => {
+        console.log('🔌 MQTT connection status changed:', isConnected)
+        setIsMqttConnected(isConnected)
+      }
+    )
 
     return () => {
       stopStreaming()
@@ -170,6 +206,7 @@ export const Home = () => {
       }
       // Unsubscribe from MQTT
       unsubscribe()
+      unsubscribeStatus()
     }
   }, [])
 
@@ -249,39 +286,14 @@ export const Home = () => {
           </div>
         </div>
         {detectionResult && detectionResult.count > 0 && (
-          <div className={classes.detectionResult}>
-            <h3 style={{ color: theme.colors.royal_blue }}>
-              Détections ({detectionResult.count} objet
-              {detectionResult.count > 1 ? 's' : ''})
-            </h3>
-
-            <div>
-              {detectionResult.detections.map((det, idx) => (
-                <div key={idx} className={classes.detectionsContainer}>
-                  <span style={{ fontWeight: 'bold' }}>{det.label}</span>
-                  <span style={{ color: theme.colors.bright_purple }}>
-                    {(det.confidence * 100).toFixed(1)}%
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            {detectionResult.annotated_image && (
-              <div>
-                <img
-                  src={detectionResult.annotated_image}
-                  alt="Détections annotées"
-                  style={{ width: '100%', borderRadius: '8px' }}
-                />
-              </div>
-            )}
-          </div>
+          <DetectionResult detectionResult={detectionResult} theme={theme} />
         )}
       </CameraCard>
-      <div>
+
+      <div className={classes.statusContainer}>
         {isProcessing && (
           <div className={classes.imageIsProcessing}>
-            Traitement en cours...
+            ⚙️ Traitement en cours...
           </div>
         )}
 
@@ -291,16 +303,32 @@ export const Home = () => {
           </div>
         )}
 
-        <div style={{ textAlign: 'center' }}>
-          <MQTTStatusIndicator isConnected={isMqttConnected} theme={theme} />
-        </div>
+        <MQTTStatusIndicator isConnected={isMqttConnected} theme={theme} />
       </div>
 
       <CameraCard ctx={{ theme }}>
         <div className={classes.containerCamera}>
-          <div>
-            <p className={classes.text}>Détections Récentes</p>
-            <p>Historique des détections d'objets</p>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <div>
+              <p className={classes.text}>Détections Récentes</p>
+              <p>Historique des détections d'objets</p>
+            </div>
+            {detections.length > 0 && (
+              <Button
+                ctx={{ theme }}
+                onClick={handleDeleteAll}
+                label="Tout Supprimer"
+                variants={buttonDangerVariant}
+              >
+                <span style={{ fontSize: '18px' }}>🗑️</span>
+              </Button>
+            )}
           </div>
 
           <DetectionsGrid

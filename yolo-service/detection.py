@@ -90,6 +90,15 @@ def on_message(client, userdata, msg):
         result = process_image(data['image'])
         
         if result:
+            # Ajouter l'image_path s'il est présent dans le message reçu
+            if 'image_path' in data:
+                result['image_path'] = data['image_path']
+                print(f"[INFO] Image path: {data['image_path']}")
+            
+            # Ajouter le timestamp original s'il existe
+            if 'timestamp' in data:
+                result['timestamp'] = data['timestamp']
+            
             print(f"[YOLO] {result['count']} objet(s) détecté(s)")
             for det in result['detections']:
                 print(f"  - {det['label']} (conf: {det['confidence']:.2f})")

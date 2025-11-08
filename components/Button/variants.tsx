@@ -10,3 +10,7 @@ export const button_purpleVariant = (theme: Theme): Variants => ({
   color: theme.colors.white,
   iconColor: theme.colors.white,
 })
+export const buttonDangerVariant = (theme: Theme): Variants => ({
+  backgroundColor: theme.colors.flame + '15',
+  color: theme.colors.flame,
+})

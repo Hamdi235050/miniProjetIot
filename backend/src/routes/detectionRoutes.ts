@@ -5,6 +5,7 @@ import {
   getAllDetections,
   getDetectionByIdController,
   getStatsController,
+  deleteAllDetectionsController,
 } from '../controllers/detectionController'
 
 const router = Router()
@@ -22,5 +23,7 @@ router.get('/detections', getAllDetections)
 router.get('/detection/:id', getDetectionByIdController)
 
 router.get('/stats', getStatsController)
+
+router.delete('/detections', deleteAllDetectionsController)
 
 export default router

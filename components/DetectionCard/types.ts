@@ -1,15 +1,7 @@
 import { Theme } from '@components/theme'
+import { DetectionFromDB } from '@/types'
 
 export interface DetectionCardProps {
-  detection: {
-    id: number
-    count: number
-    image_url?: string | null
-    created_at: string
-    detections: Array<{
-      label: string
-      confidence: number
-    }>
-  }
+  detection: DetectionFromDB
   theme: Theme
 }

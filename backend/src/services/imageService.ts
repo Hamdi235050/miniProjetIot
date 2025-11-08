@@ -48,3 +48,24 @@ export function deleteImage(filename: string): boolean {
 export function getImagesDirectory(): string {
   return IMAGES_DIR
 }
+
+export function deleteAllImages(): number {
+  try {
+    const files = fs.readdirSync(IMAGES_DIR)
+    let deletedCount = 0
+
+    files.forEach((file) => {
+      const filePath = path.join(IMAGES_DIR, file)
+      if (fs.statSync(filePath).isFile() && file.startsWith('detection_')) {
+        fs.unlinkSync(filePath)
+        deletedCount++
+      }
+    })
+
+    console.log(`   🗑️  ${deletedCount} images supprimées`)
+    return deletedCount
+  } catch (err) {
+    console.error('   ❌ Erreur suppression images:', (err as Error).message)
+    return 0
+  }
+}

@@ -4,8 +4,9 @@ import {
   getLatestDetections,
   getDetectionById,
   getStats,
+  deleteAllDetections,
 } from '../services/databaseService'
-import { saveImage } from '../services/imageService'
+import { saveImage, deleteAllImages } from '../services/imageService'
 
 export async function detectImage(req: Request, res: Response): Promise<void> {
   try {
@@ -116,6 +117,32 @@ export async function getStatsController(
     const stats = await getStats()
     res.json(stats)
   } catch (err) {
+    res.status(500).json({ error: (err as Error).message })
+  }
+}
+
+export async function deleteAllDetectionsController(
+  _req: Request,
+  res: Response
+): Promise<void> {
+  try {
+    console.log('🗑️  Suppression de toutes les détections...')
+
+    // Supprimer toutes les images
+    const deletedImagesCount = deleteAllImages()
+
+    // Supprimer toutes les détections de la base de données
+    await deleteAllDetections()
+
+    console.log('✅ Suppression terminée')
+
+    res.json({
+      success: true,
+      message: 'Toutes les détections ont été supprimées',
+      deleted_images: deletedImagesCount,
+    })
+  } catch (err) {
+    console.error('❌ Erreur lors de la suppression:', err)
     res.status(500).json({ error: (err as Error).message })
   }
 }

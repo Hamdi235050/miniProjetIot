@@ -1,18 +1,5 @@
 import { Theme } from '@components/theme'
-
-export interface DetectionFromDB {
-  id: number
-  timestamp: string
-  count: number
-  detections: Array<{
-    label: string
-    confidence: number
-    bbox: number[]
-  }>
-  image_path?: string | null
-  image_url?: string | null
-  created_at: string
-}
+import { DetectionFromDB } from '@/types'
 
 export interface DetectionsGridProps {
   detections: DetectionFromDB[]
