@@ -6,18 +6,14 @@ import { initImagesDirectory } from './services/imageService'
 
 async function startServer(): Promise<void> {
   try {
-    // Initialiser le dossier images
     initImagesDirectory()
 
-    // Initialiser la base de données
     await initDatabase()
     console.log('✅ Base de données initialisée')
 
-    // Initialiser le client MQTT
     initMqttClient()
     console.log('✅ Client MQTT initialisé')
 
-    // Créer et démarrer l'application Express
     const app = createApp()
     const port = config.port
 

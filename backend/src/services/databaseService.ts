@@ -1,5 +1,5 @@
 import { getPool } from '../config/database'
-import { Detection } from '../types'
+import { Detection } from '../types/types'
 
 export async function saveDetection(data: Detection): Promise<void> {
   const ts = data.timestamp || new Date().toISOString()

@@ -16,7 +16,6 @@ export async function detectImage(req: Request, res: Response): Promise<void> {
       return
     }
 
-    // Sauvegarder l'image dans le dossier images AVANT de la publier
     const imagePath = saveImage(image)
     if (!imagePath) {
       res.status(500).json({ error: "Erreur lors de la sauvegarde de l'image" })
@@ -25,7 +24,6 @@ export async function detectImage(req: Request, res: Response): Promise<void> {
 
     const timestamp = new Date().toISOString()
 
-    // Publier l'image avec son chemin pour que YOLO puisse l'utiliser
     await publishImage(image, timestamp, imagePath)
 
     res.json({
@@ -44,7 +42,6 @@ export function getLatest(req: Request, res: Response): void {
   const detection = getLatestDetection()
 
   if (detection) {
-    // Ajouter l'URL complète de l'image
     const baseUrl = `${req.protocol}://${req.get('host')}`
     const detectionWithImageUrl = {
       ...detection,

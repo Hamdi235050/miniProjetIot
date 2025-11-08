@@ -15,7 +15,6 @@ export function createApp(): Application {
   app.use('/images', express.static(imagesPath))
   console.log(`📁 Images servies depuis: /images`)
 
-  // Routes
   app.use('/api', detectionRoutes)
 
   return app
