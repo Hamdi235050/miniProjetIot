@@ -35,7 +35,7 @@ export const useStyles = createUseStyles(
             scrollbarColor: `${theme.colors.royal_blue} ${theme.colors.royal_blue} `,
             scrollbarWidth: 'thin',
           }),
-      flexDirection: 'column',
+      flexDirection: 'row',
       boxSizing: 'border-box',
       '&:focus': {
         outline: 'none',

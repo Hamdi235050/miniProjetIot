@@ -14,7 +14,7 @@ export const useStyles = createUseStyles((theme: Theme) => ({
     padding: '20px',
     gap: '20px',
     '@media (max-width: 1024px)': {
-      flexDirection: 'column',
+      flexDirection: 'row',
       alignItems: 'center',
     },
   },
@@ -100,7 +100,7 @@ export const useStyles = createUseStyles((theme: Theme) => ({
   },
   video: {
     width: '100%',
-    height: '25vh',
+    height: '45vh',
     objectFit: 'cover',
     borderRadius: 10,
     backgroundColor: theme.colors.dark,
